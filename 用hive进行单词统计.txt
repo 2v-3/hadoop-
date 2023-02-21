@@ -1,0 +1,24 @@
+
+create table test01(
+sentence string
+)
+row format delimited fields terminated by ',' stored as textfile
+;
+//把每行数据转化为一个数组形式
+select split(sentence,',') from test01;
+
+split字符串分割函数,返回值为一个数组
+
+//然后把数组的每一个单词拆分出来每行就只有一个单词
+select explode(split(sentence,','))from test01;
+//组合语句写一个单词统计，并排序
+select word ,count(1) as c
+from (
+select explode(split(sentence,',')) as word from test01
+) t group by word
+order by c desc;
+
+//namenode内存空间不够，JVM剩余内存空间不够，新job运行导致
+解决办法：
+将hive设置成本地模式来执行任务
+set hive.exec.mode.local.auto=true;

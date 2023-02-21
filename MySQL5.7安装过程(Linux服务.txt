@@ -1,0 +1,79 @@
+1.下载mysql安装包，然后上传mysql安装包到Linux服务器的/home/hadoop/software目录下
+mv /home/hadoop/software/mysql-5.7.37-linux-glibc2.12-x86_64.tar.gz   /home
+2.检查是否安装了MySQL
+yum list installed | grep mysql
+
+3.卸载CentOS6.5自带的MySQL(没有就不用执行这一步)
+yum remove mysql mysql-ql-libs.x86_64             
+
+4.解压mysql安装包
+cd /home
+tar -zxvf  mysql-5.7.37-linux-glibc2.12-x86_64.tar.gz
+mv mysql-5.7.37-linux-glibc2.12-x86_64  mysql5.7    
+
+5.在mysql目录下面创建data目录
+mkdir /home/mysql5.7/data
+
+6.创建mysql的用户组和用户,并且给mysql5.7目录设置用户组和用户
+cd /home
+groupadd mysql
+useradd mysql -g mysql
+cd mysql5.7
+chown -R mysql . 
+chgrp -R mysql . 
+//注意这儿的.必须要，否则会报错。
+
+7.配置my.cnf文件
+vim /etc/my.cnf ,添加内容如下：
+[mysqld]
+ basedir=/home/mysql5.7
+ datadir=/home/mysql5.7/data
+ port=3306
+ 
+ [client]
+ default-character-set=utf8
+ 
+ [mysql]
+ default-character-set=utf8
+
+8.修改/etc/selinux/config文件配置
+vi /etc/selinux/config
+把SELINUX=enforcing改为SELINUX=disabled,保存退出，然后重启服务器。
+
+9.创建sock文件目录
+mkdir -p /var/lib/mysql
+cd /home/mysql5.7
+chown  mysql:mysql  /var/lib/mysql
+
+10.配置mysql环境变量
+vim /etc/profile 
+添加如下内容：
+export MYSQL_HOME=/home/mysql5.7
+export PATH=$MYSQL_HOME/bin:$PATH
+
+
+12.初始化mysql，下面一行代码
+mysqld --user=mysql --basedir=/home/mysql5.7 --datadir=/home/mysql5.7/data --initialize
+
+13.启动mysql服务器
+/home/mysql5.7/support-files/mysql.server restart
+/home/mysql5.7/support-files/mysql.server stop
+/home/mysql5.7/support-files/mysql.server start
+
+14.检查mysql服务是否正常
+ps -ef | grep mysql
+
+15.登陆mysql
+mysql -u root -p
+
+16.需要注意的是，刚安装的mysql，不能直接使用，需要修改初始密码
+set password=password("123456");
+
+
+
+
+
+
+
+
+
